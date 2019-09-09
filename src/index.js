@@ -1,1 +1,1 @@
-require('../wheel/index.js')
+import '../wheel/mvvm/index'
