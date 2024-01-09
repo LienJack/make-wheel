@@ -2,6 +2,7 @@
 class AuthChain {
     constructor () {
         this.arr = []
+        this.params = []
         this.index = -1
         this.context = {}
         this.res = true
@@ -10,7 +11,8 @@ class AuthChain {
         this.index = i
         if (i === this.arr.length) return this.res
         let fn = this.arr[i]
-        fn(this.context, this.next.bind(this, i + 1), this.end.bind(this))
+        let param = this.params[i]
+        fn(this.context, this.next.bind(this, i + 1), this.end.bind(this),param)
     }
     end(res) {
         this.res = res
@@ -22,18 +24,17 @@ class AuthChain {
     }
     isAdmin() {
         this.arr.push(isAdmin)
+        this.params.push(undefined)
         return this
     }
     isRandom() {
         this.arr.push(isRandom)
-        return this
-    }
-    comprose(fn) {
-        this.arr.push(fn.bind(this, this.context, this.next.bind(this, this.index + 1), this.end.bind(this),...args))
+        this.params.push(undefined)
         return this
     }
     or(...fns) {
-        this.arr.push(or.bind(this, this.context, this.next.bind(this,this.index  + 1), this.end.bind(this),fns))
+        this.arr.push(or)
+        this.params.push(fns)
         return this
     }
 
@@ -52,7 +53,7 @@ function or (context, next, end, fns) {
         next()
         return
     }
-    end()
+    end(false)
 }
 
 function isAdmin(context, next, end) {
@@ -69,4 +70,5 @@ function isRandom(contex, next, end) {
 
 const auth = new AuthChain()
 const res = auth.isAdmin().isRandom().result()
+console.log(res)
 
