@@ -28,6 +28,31 @@ class AuthChain {
         this.arr.push(isRandom)
         return this
     }
+    comprose(fn) {
+        this.arr.push(fn.bind(this, this.context, this.next.bind(this, this.index + 1), this.end.bind(this),...args))
+        return this
+    }
+    or(...fns) {
+        this.arr.push(or.bind(this, this.context, this.next.bind(this,this.index  + 1), this.end.bind(this),fns))
+        return this
+    }
+
+}
+function or (context, next, end, fns) {
+    const nexArr = []
+    const endArr = []
+    function _next () {
+        nexArr.push(true)
+    }
+    function _end (i) {
+        endArr.push(i)
+    }
+    fns.forEach((fn) => fn(context,_next,_end))
+    if (nexArr.some(i => i) || endArr.some(i => i)) {
+        next()
+        return
+    }
+    end()
 }
 
 function isAdmin(context, next, end) {
@@ -41,5 +66,7 @@ function isRandom(contex, next, end) {
     }
 }
 
+
 const auth = new AuthChain()
 const res = auth.isAdmin().isRandom().result()
+
